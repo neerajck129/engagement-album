@@ -19,9 +19,9 @@ export const albumConfig = {
   /** Single place to swap the PDF. Put the file in /public/album/. */
   pdfPath: '/album/engagement-album.pdf',
 
-  title: 'Our Engagement',
-  brideName: 'Bride’s Name', // placeholder — replace
-  engagementDate: 'Month DD, YYYY', // placeholder — replace
+  title: 'Engagement',
+  brideName: 'Ardra CK & Shibu Manayath', // placeholder — replace
+  engagementDate: '25th October 2026', // placeholder — replace
   /** Letters shown in the loader / closing page. Leave '' to derive from brideName. */
   monogram: '',
 
