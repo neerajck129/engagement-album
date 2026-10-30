@@ -1,0 +1,290 @@
+@import 'tailwindcss';
+
+/* Colours come from src/config/albumConfig.ts (applied as CSS variables by AlbumViewer). */
+:root {
+  --ivory: #f7f3eb;
+  --cream: #eee7db;
+  --charcoal: #302d29;
+  --muted: #81786d;
+  --gold: #b69a67;
+  --line: #ded5c7;
+}
+
+@theme inline {
+  --color-ivory: var(--ivory);
+  --color-cream: var(--cream);
+  --color-charcoal: var(--charcoal);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-line: var(--line);
+  --font-serif: 'Cormorant Garamond', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+body {
+  background: var(--ivory);
+  color: var(--charcoal);
+  font-family: var(--font-sans);
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ---------- Book ---------- */
+.book-shell {
+  position: relative;
+  will-change: transform;
+  flex: none;
+}
+.album-book {
+  touch-action: none;
+  min-width: 0 !important; /* the engine sets inline min sizes; our container size is authoritative */
+  min-height: 0 !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.book-shadow {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: -2;
+  border-radius: 2px;
+  box-shadow: 0 30px 50px -22px rgba(48, 45, 41, 0.42), 0 12px 22px -10px rgba(48, 45, 41, 0.24);
+  transition: left 0.5s ease, width 0.5s ease;
+  pointer-events: none;
+}
+.book-shell[data-mode='double'][data-state='front'] .book-shadow {
+  left: 50%;
+  width: 50%;
+}
+.book-shell[data-mode='double'][data-state='back'] .book-shadow {
+  width: 50%;
+}
+
+.book-edge {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  z-index: -1;
+  pointer-events: none;
+  background: repeating-linear-gradient(to right, #d9cfbd 0 1px, #f7f2e8 1px 2.4px);
+  transition: width 0.4s ease, opacity 0.4s ease;
+}
+.book-edge-left {
+  right: 100%;
+  width: var(--edge-left, 4px);
+  margin-right: -1px;
+  border-radius: 2px 0 0 2px;
+}
+.book-edge-right {
+  left: 100%;
+  width: var(--edge-right, 4px);
+  margin-left: -1px;
+  border-radius: 0 2px 2px 0;
+}
+.book-shell[data-state='front'] .book-edge-left,
+.book-shell[data-state='back'] .book-edge-right {
+  opacity: 0;
+}
+
+.book-spine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 40px;
+  margin-left: -20px;
+  z-index: 40;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: multiply;
+  transition: opacity 0.35s ease;
+  background: linear-gradient(
+    90deg,
+    rgba(48, 45, 41, 0) 0%,
+    rgba(48, 45, 41, 0.08) 38%,
+    rgba(48, 45, 41, 0.2) 50%,
+    rgba(48, 45, 41, 0.08) 62%,
+    rgba(48, 45, 41, 0) 100%
+  );
+}
+.book-shell[data-mode='double'][data-state='open'] .book-spine {
+  opacity: 1;
+}
+
+/* ---------- Pages ---------- */
+.album-page {
+  background: #fbf9f4;
+}
+.album-page-inner {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #fbf9f4;
+}
+.pdf-frame {
+  position: absolute;
+  inset: 0;
+}
+.pdf-img {
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  max-width: none;
+}
+.pdf-placeholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, #f3eee4 30%, #faf7f0 50%, #f3eee4 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
+}
+@keyframes shimmer {
+  to {
+    background-position-x: -200%;
+  }
+}
+
+/* soft gutter shading near the binding (the engine adds --left / --right) */
+.stf__item.--left .album-page-inner::after,
+.stf__item.--right .album-page-inner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6%;
+  pointer-events: none;
+}
+.stf__item.--left .album-page-inner::after {
+  right: 0;
+  background: linear-gradient(to left, rgba(48, 45, 41, 0.1), rgba(48, 45, 41, 0));
+}
+.stf__item.--right .album-page-inner::after {
+  left: 0;
+  background: linear-gradient(to right, rgba(48, 45, 41, 0.1), rgba(48, 45, 41, 0));
+}
+/* cover: hinge groove and a hairline edge */
+.kind-cover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 3.2%;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(to right, rgba(48, 45, 41, 0.22), rgba(255, 255, 255, 0.14) 45%, rgba(48, 45, 41, 0.06) 70%, rgba(48, 45, 41, 0));
+}
+.kind-cover,
+.kind-back {
+  box-shadow: inset 0 0 0 1px rgba(48, 45, 41, 0.08);
+}
+.kind-filler {
+  background: linear-gradient(180deg, #f5f0e6, #f1ebdf);
+}
+.kind-back {
+  background: radial-gradient(120% 90% at 50% 40%, #f9f5ed, #efe8da);
+}
+.back-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10%;
+  color: var(--charcoal);
+}
+.back-mark {
+  font-family: var(--font-serif);
+  font-size: clamp(28px, 9cqw, 64px);
+  letter-spacing: 0.12em;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  width: 2.4em;
+  height: 2.4em;
+  display: grid;
+  place-items: center;
+}
+.back-rule {
+  width: 36px;
+  height: 1px;
+  background: var(--gold);
+  margin: 1.4em 0;
+}
+.back-title {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: clamp(18px, 6cqw, 34px);
+  margin: 0 0 0.5em;
+}
+.back-sub {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.9;
+}
+
+/* ---------- Motion preferences ---------- */
+@media (prefers-reduced-motion: reduce) {
+  .pdf-placeholder {
+    animation: none;
+  }
+  .book-shadow,
+  .book-edge,
+  .book-spine {
+    transition: none;
+  }
+}
+
+/* loader */
+@keyframes gold-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(260%);
+  }
+}
+@keyframes soft-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loader-sweep,
+  .loader-pulse {
+    animation: none !important;
+  }
+}
+
+.kind-back {
+  container-type: size;
+}
